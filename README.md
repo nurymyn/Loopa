@@ -99,7 +99,8 @@ Loopa — приложение коротких вертикальных вид�
 
 1. **Установите программы** (один раз):
    - [Node.js 22 LTS](https://nodejs.org/);
-   - [Docker Desktop](https://www.docker.com/products/docker-desktop/) — в нём будет работать PostgreSQL;
+   - [Docker Desktop](https://www.docker.com/products/docker-desktop/) — в нём будет работать PostgreSQL.
+     Docker не обязателен: можно поставить PostgreSQL 16 прямо на компьютер, см. [PostgreSQL без Docker](#postgresql-без-docker);
    - [ffmpeg](https://ffmpeg.org/download.html) — нужен, чтобы скачать демо-видео
      (macOS: `brew install ffmpeg`, Windows: `winget install ffmpeg`, Ubuntu: `sudo apt install ffmpeg`);
    - на телефон — приложение **Expo Go** из App Store или Google Play.
@@ -112,6 +113,7 @@ Loopa — приложение коротких вертикальных вид�
    Без git: на странице репозитория нажмите зелёную кнопку **Code → Download ZIP**, распакуйте архив и откройте
    терминал в распакованной папке `Loopa-main`, затем выполните `npm run setup`.
 3. **Запустите базу данных и подготовьте её.** Перед `docker compose up -d` Docker Desktop должен быть запущен.
+   Если PostgreSQL установлен без Docker, пропустите строку `docker compose up -d`.
    ```bash
    docker compose up -d          # PostgreSQL 16 в Docker
    npm run media                 # скачать 10 демо-роликов (один раз)
@@ -133,6 +135,28 @@ Loopa — приложение коротких вертикальных вид�
    Отсканируйте QR-код камерой iPhone или из Expo Go на Android. Приложение само найдёт сервер на том же
    компьютере (порт 4000). Нажмите «Войти как демо» или зарегистрируйтесь.
 
+### PostgreSQL без Docker
+
+Docker нужен только для PostgreSQL 16. PostgreSQL, установленный прямо на компьютер, работает так же.
+
+На Windows:
+
+1. Скачайте установщик PostgreSQL 16 с https://www.postgresql.org/download/windows/ и запустите его. Настройки
+   оставьте по умолчанию (порт 5432). Задайте пароль для пользователя `postgres` и запомните его. В конце снимите
+   галочку «Launch Stack Builder». Служба PostgreSQL запускается вместе с компьютером.
+2. Меню «Пуск» → **SQL Shell (psql)**. Нажмите Enter четыре раза, затем введите пароль `postgres`
+   (при вводе он не отображается).
+3. Вставьте и нажмите Enter, затем введите `\q`:
+   ```sql
+   CREATE USER loopa WITH PASSWORD 'loopa';
+   CREATE DATABASE loopa OWNER loopa;
+   ```
+4. Продолжайте быстрый старт с шага 3, но без `docker compose up -d`: `npm run media`, `npm run migrate`,
+   `npm run seed`, затем `npm run dev`.
+
+На macOS и Linux подойдёт любой PostgreSQL 16 с пользователем, паролем и базой `loopa`. Другие данные
+подключения укажите в `DATABASE_URL` в `server/.env` (скопируйте `server/.env.example`).
+
 **Если телефон не в той же сети** или QR не открывается: `npx expo start --tunnel`. В этом режиме приложение
 не знает адрес сервера, поэтому сервер тоже нужно открыть наружу (например, `npx localtunnel --port 4000`)
 и указать адрес в `mobile/.env`: `EXPO_PUBLIC_API_URL=https://ваш-адрес`. Пример — в `mobile/.env.example`.
@@ -149,7 +173,7 @@ Loopa — приложение коротких вертикальных вид�
 | Команда (из корня) | Что делает |
 |---|---|
 | `npm run setup` | Ставит зависимости сервера и приложения |
-| `docker compose up -d` | Поднимает PostgreSQL 16 |
+| `docker compose up -d` | Поднимает PostgreSQL 16 в Docker (без Docker не нужна) |
 | `npm run media` | Скачивает демо-ролики с Mixkit в `media/` (нужен ffmpeg) |
 | `npm run migrate` | Применяет новые миграции из `server/migrations/` |
 | `npm run seed` | Стирает данные и заливает демо-данные |

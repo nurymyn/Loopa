@@ -24,7 +24,8 @@ npm run seed             # СТИРАЕТ все данные и заливае�
 ```
 
 Строка подключения — `DATABASE_URL` (по умолчанию `postgres://loopa:loopa@localhost:5432/loopa`).
-Посмотреть базу руками: `docker compose exec db psql -U loopa loopa`.
+Посмотреть базу руками: `docker compose exec db psql -U loopa loopa`. Без Docker: `psql -U loopa loopa`
+(на Windows — SQL Shell (psql) из меню «Пуск», пользователь и база `loopa`).
 
 ## Таблицы
 
