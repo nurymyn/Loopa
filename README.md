@@ -109,18 +109,22 @@ Loopa — приложение коротких вертикальных вид�
    cd Loopa
    npm run setup
    ```
-3. **Запустите базу данных и подготовьте её:**
+   Без git: на странице репозитория нажмите зелёную кнопку **Code → Download ZIP**, распакуйте архив и откройте
+   терминал в распакованной папке `Loopa-main`, затем выполните `npm run setup`.
+3. **Запустите базу данных и подготовьте её.** Перед `docker compose up -d` Docker Desktop должен быть запущен.
    ```bash
    docker compose up -d          # PostgreSQL 16 в Docker
    npm run media                 # скачать 10 демо-роликов (один раз)
-   npm run migrate && npm run seed
+   npm run migrate
+   npm run seed
    ```
    `seed` стирает все данные в базе и заливает демо-данные заново.
 4. **Запустите сервер** (окно терминала не закрывайте):
    ```bash
    npm run dev
    ```
-   Проверка: откройте http://localhost:4000/health — должно быть `{"ok":true}`.
+   Проверка: откройте http://localhost:4000/health — должно быть `{"ok":true}`. На Windows, когда брандмауэр
+   спросит про Node.js, разрешите доступ в частных сетях, иначе телефон не достучится до сервера.
 5. **Запустите приложение** во втором окне терминала:
    ```bash
    cd mobile
@@ -150,7 +154,7 @@ Loopa — приложение коротких вертикальных вид�
 | `npm run migrate` | Применяет новые миграции из `server/migrations/` |
 | `npm run seed` | Стирает данные и заливает демо-данные |
 | `npm run dev` | Сервер с автоперезапуском на http://localhost:4000 |
-| `npm run mobile` | То же, что `cd mobile && npx expo start` |
+| `npm run mobile` | То же, что `npx expo start` в папке `mobile` |
 | `npm test` | Тесты API (нужна база после `migrate` и `seed`) |
 | `npm run typecheck` | Проверка типов сервера и приложения |
 | `npm run check` | `typecheck` + `test` |
