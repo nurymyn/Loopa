@@ -32,5 +32,5 @@
 | 5. Профиль: имя, био, фото из галереи, списки подписчиков/подписок, подписка отовсюду | `app/edit-profile.tsx`, `app/people/[handle].tsx` | готово |
 | 6. Поиск по людям, подписям и хэштегам, страница хэштега, страница звука, недавние запросы | `app/search.tsx`, `app/hashtag/[tag].tsx`, `app/sound.tsx`, `server/src/routes/discover.ts` | готово |
 | 7. Счётчик непрочитанного на вкладке, «прочитано» при открытии, обновление жестом и подгрузка на всех списках | `TabBar.tsx`, `lib/session.tsx`, `lib/usePaged.ts` | частично: «Друзья» и «Поиск» без подгрузки (короткие списки) |
-| 8. Тесты API на PostgreSQL, strict TypeScript, CI, настоящие скриншоты | `server/test/`, `.github/workflows/ci.yml`, `docs/screenshots/` | готово; CI на GitHub ещё ни разу не запускался |
-| 9. Переключатель языка ru/kk/en | — | не сделано, задача №1 в `HANDOFF.md` |
+| 8. Тесты API на PostgreSQL, strict TypeScript, CI, настоящие скриншоты | `server/test/`, `.github/workflows/ci.yml`, `docs/screenshots/` | готово; CI проходит на main (jobs `server` и `mobile`) |
+| 9. Переключатель языка ru/kk/en | — | не сделано, задача 2 в `HANDOFF.md` |
