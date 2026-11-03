@@ -1,5 +1,7 @@
 # Loopa
 
+[![CI](https://github.com/nurymyn/Loopa/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/nurymyn/Loopa/actions/workflows/ci.yml)
+
 Loopa — приложение коротких вертикальных видео: лента «Для вас» и «Подписки», лайки, комментарии, подписки,
 уведомления, съёмка и публикация своих роликов. Мобильное приложение на Expo (открывается в Expo Go по QR-коду),
 сервер на Node.js + Fastify, все данные хранятся в PostgreSQL.

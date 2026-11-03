@@ -31,7 +31,7 @@
   системное меню «Поделиться», expo-secure-store, вырезы экрана;
 - `docker compose up` и Docker-образ API — Docker в песочнице недоступен (PostgreSQL запускали из бинарников
   пакета `@embedded-postgres/linux-x64`);
-- GitHub Actions — ещё ни разу не запускался.
+- GitHub Actions: CI проходит на main (jobs server и mobile, 2026-11-03).
 
 ## Команды
 
