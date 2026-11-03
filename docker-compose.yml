@@ -1,0 +1,41 @@
+# Local development stack.
+#   docker compose up -d            -> PostgreSQL 16 only (the API runs on your machine with `npm run dev`)
+#   docker compose --profile api up -d --build   -> PostgreSQL + the API in a container
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-loopa}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-loopa}
+      POSTGRES_DB: ${POSTGRES_DB:-loopa}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-loopa} -d ${POSTGRES_DB:-loopa}"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  api:
+    profiles: ["api"]
+    build: ./server
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-loopa}:${POSTGRES_PASSWORD:-loopa}@db:5432/${POSTGRES_DB:-loopa}
+      PORT: 4000
+      SEED_MEDIA_DIR: /media
+      UPLOAD_DIR: /data/uploads
+      DEV_AUTH: ${DEV_AUTH:-true}
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./media:/media:ro
+      - uploads:/data/uploads
+
+volumes:
+  pgdata:
+  uploads:
