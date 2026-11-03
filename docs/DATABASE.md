@@ -27,6 +27,13 @@ npm run seed             # СТИРАЕТ все данные и заливае�
 Посмотреть базу руками: `docker compose exec db psql -U loopa loopa`. Без Docker: `psql -U loopa loopa`
 (на Windows — SQL Shell (psql) из меню «Пуск», пользователь и база `loopa`).
 
+В pgAdmin 4 (на Windows ставится вместе с PostgreSQL): Servers → PostgreSQL 16 (пароль `postgres` из установки) →
+Databases → loopa → Schemas → public → Tables, правый клик по таблице → View/Edit Data → All Rows.
+Свой SQL: правый клик по `loopa` → Query Tool, запуск — F5. Например, аккаунты:
+`SELECT id, handle, display_name, created_at FROM users ORDER BY id DESC;`. Пароли хранятся только как
+`password_hash` (scrypt). `npm run seed` создаёт 19 демо-аккаунтов с `id` 1–19, зарегистрированные в приложении
+идут после них. Повторный `seed` удаляет и их.
+
 ## Таблицы
 
 | Таблица | Что хранит | Ключ и важные поля |
