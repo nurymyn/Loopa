@@ -20,8 +20,8 @@ export const config = {
   seedMediaDir: path.resolve(serverRoot, process.env.SEED_MEDIA_DIR ?? '../media'),
   /** Folder for user uploads. Served at /media/uploads/. */
   uploadDir: path.resolve(serverRoot, process.env.UPLOAD_DIR ?? './uploads'),
-  /** Max upload size in megabytes. */
-  maxUploadMb: Number(process.env.MAX_UPLOAD_MB ?? 50),
+  /** Max upload size in megabytes. A 60 s 1080p phone video is about 100-130 MB. */
+  maxUploadMb: Number(process.env.MAX_UPLOAD_MB ?? 200),
   /** If set, absolute media/share URLs use this instead of the request Host header. */
   publicBaseUrl: process.env.PUBLIC_BASE_URL?.replace(/\/$/, '') || null,
   /** Enables POST /api/auth/dev-login. Never enable on a public server. */

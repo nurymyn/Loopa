@@ -28,6 +28,9 @@ export const uploadRoutes: FastifyPluginAsync = async (app) => {
 
     const fields: Record<string, string> = {};
     let saved: { abs: string; rel: string } | null = null;
+    // Set as soon as the file stream is opened, so a failure mid-upload
+    // (size limit, client disconnect) still removes the partial file.
+    let partial: string | null = null;
 
     try {
       for await (const part of req.parts()) {
@@ -44,11 +47,12 @@ export const uploadRoutes: FastifyPluginAsync = async (app) => {
           }
           const name = `${crypto.randomUUID()}${ext}`;
           const abs = path.join(config.uploadDir, name);
+          partial = abs;
           await pipeline(part.file, fs.createWriteStream(abs));
           if (part.file.truncated) {
-            fs.rmSync(abs, { force: true });
             throw new HttpError(413, `File is larger than ${config.maxUploadMb} MB`);
           }
+          partial = null;
           saved = { abs, rel: `uploads/${name}` };
         } else {
           fields[part.fieldname] = String(part.value ?? '');
@@ -56,6 +60,7 @@ export const uploadRoutes: FastifyPluginAsync = async (app) => {
       }
     } catch (err) {
       if (saved) fs.rmSync(saved.abs, { force: true });
+      if (partial) fs.rmSync(partial, { force: true });
       throw err;
     }
     if (!saved) throw badRequest('Field "video" with a file is required');

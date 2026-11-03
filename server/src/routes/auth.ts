@@ -131,7 +131,12 @@ export const authRoutes: FastifyPluginAsync = async (app) => {
     fs.mkdirSync(dir, { recursive: true });
     const name = `${crypto.randomUUID()}${ext}`;
     const abs = path.join(dir, name);
-    await pipeline(file.file, fs.createWriteStream(abs));
+    try {
+      await pipeline(file.file, fs.createWriteStream(abs));
+    } catch (err) {
+      fs.rmSync(abs, { force: true });
+      throw err;
+    }
     if (file.file.truncated) {
       fs.rmSync(abs, { force: true });
       throw new HttpError(413, 'Картинка больше 5 МБ');
