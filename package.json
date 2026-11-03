@@ -1,0 +1,20 @@
+{
+  "name": "loopa",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Loopa: short vertical videos. Expo app + Fastify API + PostgreSQL.",
+  "license": "MIT",
+  "scripts": {
+    "setup": "npm install --prefix server && npm install --prefix mobile",
+    "db:up": "docker compose up -d db",
+    "db:down": "docker compose down",
+    "media": "npm run media --prefix server",
+    "migrate": "npm run migrate --prefix server",
+    "seed": "npm run seed --prefix server",
+    "dev": "npm run dev --prefix server",
+    "mobile": "npm start --prefix mobile",
+    "test": "npm test --prefix server",
+    "typecheck": "npm run typecheck --prefix server && npm run typecheck --prefix mobile",
+    "check": "npm run typecheck && npm test"
+  }
+}

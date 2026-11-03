@@ -1,0 +1,33 @@
+{
+  "name": "@loopa/server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Loopa API: Fastify + PostgreSQL",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "tsx watch --env-file-if-exists=.env src/index.ts",
+    "start": "node --env-file-if-exists=.env dist/src/index.js",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "migrate": "tsx --env-file-if-exists=.env scripts/migrate.ts",
+    "seed": "tsx --env-file-if-exists=.env scripts/seed.ts",
+    "test": "tsx --env-file-if-exists=.env --test test/*.test.ts",
+    "media": "tsx --env-file-if-exists=.env scripts/fetch-media.ts"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.4.0",
+    "@fastify/multipart": "^10.1.7",
+    "@fastify/static": "^10.1.8",
+    "fastify": "^5.12.8",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/pg": "^8.23.1",
+    "tsx": "^4.23.15",
+    "typescript": "~6.0.3"
+  }
+}
