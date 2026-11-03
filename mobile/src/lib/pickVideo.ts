@@ -1,7 +1,34 @@
+import { File } from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import { Alert } from 'react-native';
 
 export const MAX_VIDEO_SECONDS = 60;
+
+/** Size of a local file in bytes, or null when it cannot be read. */
+export function fileSizeBytes(uri: string): number | null {
+  try {
+    const size = new File(uri).size;
+    return size > 0 ? size : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Russian message for a video that is over the server's upload limit. */
+export function tooLargeMessage(maxUploadMb: number): string {
+  return `Видео больше ${maxUploadMb} МБ — сервер его не примет. Снимите ролик короче или выберите видео поменьше.`;
+}
+
+/**
+ * True when the video fits the server limit. Shows an alert and returns false
+ * when it does not, so the caller can skip the upload entirely.
+ */
+export function checkVideoSize(uri: string, maxUploadMb: number): boolean {
+  const size = fileSizeBytes(uri);
+  if (size === null || size <= maxUploadMb * 1024 * 1024) return true;
+  Alert.alert('Видео слишком большое', tooLargeMessage(maxUploadMb));
+  return false;
+}
 
 /** Pick a video from the gallery. Returns its local uri, or null if cancelled. */
 export async function pickVideoFromLibrary(): Promise<string | null> {

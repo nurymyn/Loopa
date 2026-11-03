@@ -124,6 +124,9 @@ export default function RecordScreen() {
         mode="video"
         facing={facing}
         enableTorch={torch}
+        // 720p at ~5 Mbps keeps a MAX_VIDEO_SECONDS clip well under the upload limit.
+        videoQuality="720p"
+        videoBitrate={5_000_000}
         onCameraReady={() => setReady(true)}
       />
 

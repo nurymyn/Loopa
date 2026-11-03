@@ -15,8 +15,8 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BackHeader } from '../components/BackHeader';
-import { api, describeError } from '../lib/api';
-import { MAX_VIDEO_SECONDS, pickVideoFromLibrary, videoFile } from '../lib/pickVideo';
+import { api, describeError, getMaxUploadMb } from '../lib/api';
+import { MAX_VIDEO_SECONDS, checkVideoSize, pickVideoFromLibrary, videoFile } from '../lib/pickVideo';
 import { useSession } from '../lib/session';
 import { colors, font, radius, space } from '../theme';
 
@@ -61,6 +61,10 @@ export default function PublishScreen() {
 
   const publish = async () => {
     if (!picked || progress !== null) return;
+    // Ask the server for its limit and refuse a too-big file before sending it:
+    // a dropped mid-upload connection looks like a network error on the phone.
+    const maxUploadMb = await getMaxUploadMb();
+    if (!checkVideoSize(picked.uri, maxUploadMb)) return;
     setProgress(0);
     try {
       const video = await api.publish(picked, { caption: caption.trim() }, setProgress);

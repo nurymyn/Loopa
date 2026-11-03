@@ -37,11 +37,15 @@ export function setToken(t: string | null) {
   token = t;
 }
 
-/** kind 'network' = server unreachable; 'http' = server answered with an error. */
+/**
+ * kind 'network' = the server could not be reached at all;
+ * 'dropped' = the connection broke while a request was being sent;
+ * 'http' = the server answered with an error.
+ */
 export class ApiError extends Error {
   constructor(
     message: string,
-    public readonly kind: 'network' | 'http',
+    public readonly kind: 'network' | 'dropped' | 'http',
     public readonly status?: number,
   ) {
     super(message);
@@ -52,8 +56,27 @@ export function describeError(err: unknown): string {
   if (err instanceof ApiError && err.kind === 'network') {
     return `Нет связи с сервером (${API_URL}). Проверьте, что API запущен и телефон в той же Wi-Fi сети.`;
   }
+  if (err instanceof ApiError && err.kind === 'dropped') {
+    return `Связь с сервером (${API_URL}) оборвалась во время загрузки. Проверьте Wi-Fi и попробуйте ещё раз.`;
+  }
   if (err instanceof ApiError) return err.message;
   return 'Что-то пошло не так. Попробуйте ещё раз.';
+}
+
+/** Upload limit used when the server cannot be asked (see GET /api/config). */
+export const FALLBACK_MAX_UPLOAD_MB = 200;
+let maxUploadMb: number | null = null;
+
+/** The server's video upload limit in megabytes, cached after the first call. */
+export async function getMaxUploadMb(): Promise<number> {
+  if (maxUploadMb !== null) return maxUploadMb;
+  try {
+    const cfg = await request<{ maxUploadMb: number }>('GET', '/config');
+    if (typeof cfg.maxUploadMb === 'number' && cfg.maxUploadMb > 0) maxUploadMb = cfg.maxUploadMb;
+  } catch {
+    // Offline or an older server: the fallback matches the server default.
+  }
+  return maxUploadMb ?? FALLBACK_MAX_UPLOAD_MB;
 }
 
 async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
@@ -182,7 +205,9 @@ function upload<T>(
       const xhr = new XMLHttpRequest();
       xhr.open('POST', `${API_URL}/api${path}`);
       if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+      let sentBytes = 0;
       xhr.upload.onprogress = (e) => {
+        sentBytes = e.loaded;
         if (e.lengthComputable) onProgress(e.loaded / e.total);
       };
       xhr.onload = () => {
@@ -190,7 +215,9 @@ function upload<T>(
         if (xhr.status >= 200 && xhr.status < 300 && data) resolve(data);
         else reject(new ApiError(data?.error ?? `Ошибка загрузки (${xhr.status})`, 'http', xhr.status));
       };
-      xhr.onerror = () => reject(new ApiError('network', 'network'));
+      // onerror fires both when the server is unreachable and when the
+      // connection breaks mid-upload; upload progress tells the two apart.
+      xhr.onerror = () => reject(new ApiError('network', sentBytes > 0 ? 'dropped' : 'network'));
       const form = new FormData();
       for (const [k, v] of Object.entries(fields)) form.append(k, v);
       // React Native's FormData accepts { uri, name, type } for files.

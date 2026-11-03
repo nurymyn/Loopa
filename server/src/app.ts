@@ -15,6 +15,7 @@ import { socialRoutes } from './routes/social.js';
 import { uploadRoutes } from './routes/upload.js';
 import { shareRoutes } from './routes/share.js';
 import { discoverRoutes } from './routes/discover.js';
+import { configRoutes } from './routes/config.js';
 import { pool } from './db.js';
 
 export async function buildApp(opts: { logger?: boolean } = {}): Promise<FastifyInstance> {
@@ -68,6 +69,7 @@ export async function buildApp(opts: { logger?: boolean } = {}): Promise<Fastify
       await api.register(socialRoutes);
       await api.register(uploadRoutes);
       await api.register(discoverRoutes);
+      await api.register(configRoutes);
     },
     { prefix: '/api' },
   );

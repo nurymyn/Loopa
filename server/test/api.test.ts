@@ -7,7 +7,10 @@ import { after, before, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../src/app.js';
+import fs from 'node:fs';
+import path from 'node:path';
 import { pool } from '../src/db.js';
+import { config } from '../src/config.js';
 
 let app: FastifyInstance;
 const auth = { authorization: 'Bearer demo-token' };
@@ -112,7 +115,9 @@ describe('Loopa API', () => {
   });
 
   it('inbox lists notifications for the demo user', async () => {
-    const r = await json('GET', '/api/inbox');
+    // The demo user has more notifications than one page holds, so ask for the
+    // largest page the route allows to see every type.
+    const r = await json('GET', '/api/inbox?limit=50');
     const types = new Set(r.body.items.map((n: any) => n.type));
     for (const t of ['like', 'comment', 'follow']) assert.ok(types.has(t), `inbox has ${t}`);
   });
@@ -190,6 +195,54 @@ describe('Loopa API', () => {
     assert.equal(res.statusCode, 200);
     assert.match(res.body, /<meta property="og:image" content="[^"]+01-donuts\.jpg">/);
     assert.match(res.body, /loopa:\/\/video\/1/);
+  });
+
+  it('config reports the upload limit', async () => {
+    const r = await json('GET', '/api/config', undefined, {});
+    assert.equal(r.status, 200);
+    assert.equal(r.body.maxUploadMb, config.maxUploadMb);
+  });
+
+  it('video upload', async () => {
+    const boundary = '----loopavideo';
+    const payload = Buffer.concat([
+      Buffer.from('--' + boundary + '\r\nContent-Disposition: form-data; name="caption"\r\n\r\nтест #еда\r\n'),
+      Buffer.from('--' + boundary + '\r\nContent-Disposition: form-data; name="video"; filename="v.mp4"\r\nContent-Type: video/mp4\r\n\r\nnot really a video, but the server does not transcode\r\n'),
+      Buffer.from('\r\n--' + boundary + '--\r\n'),
+    ]);
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/videos',
+      payload,
+      headers: { ...auth, 'content-type': 'multipart/form-data; boundary=' + boundary },
+    });
+    assert.equal(res.statusCode, 201);
+    const video = res.json();
+    assert.match(video.videoUrl, /[.]mp4$/);
+    const saved = path.join(config.uploadDir, video.videoUrl.split('/media/uploads/')[1]);
+    assert.ok(fs.existsSync(saved), 'uploaded file is on disk');
+    fs.rmSync(saved, { force: true });
+  });
+
+  it('rejects a video over the limit with 413 and leaves no file', async () => {
+    const boundary = '----loopabig';
+    const before = new Set(fs.readdirSync(config.uploadDir));
+    const limit = config.maxUploadMb * 1024 * 1024;
+    const payload = Buffer.concat([
+      Buffer.from('--' + boundary + '\r\nContent-Disposition: form-data; name="video"; filename="big.mp4"\r\nContent-Type: video/mp4\r\n\r\n\r\n'),
+      Buffer.alloc(limit + 1024, 1),
+      Buffer.from('\r\n--' + boundary + '--\r\n'),
+    ]);
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/videos',
+      payload,
+      headers: { ...auth, 'content-type': 'multipart/form-data; boundary=' + boundary },
+    });
+    assert.equal(res.statusCode, 413);
+    assert.match(res.json().error, /larger than [0-9]+ MB/);
+    const after = fs.readdirSync(config.uploadDir).filter((f) => !before.has(f));
+    assert.deepEqual(after, [], 'no partial file is left behind');
   });
 
   it('avatar upload', async () => {
