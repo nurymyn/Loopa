@@ -1,0 +1,58 @@
+{
+  "expo": {
+    "name": "Loopa",
+    "slug": "loopa",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "loopa",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#000000",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "app.loopa.mobile"
+    },
+    "android": {
+      "package": "app.loopa.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#000000",
+        "foregroundImage": "./assets/images/android-icon-foreground.png"
+      }
+    },
+    "web": {
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#000000",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 120
+        }
+      ],
+      "expo-video",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Loopa открывает галерею, чтобы вы могли выбрать видео для публикации.",
+          "cameraPermission": "Loopa использует камеру, чтобы снять видео для публикации.",
+          "microphonePermission": "Loopa записывает звук вместе с видео."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Loopa использует камеру, чтобы снять видео для публикации.",
+          "microphonePermission": "Loopa записывает звук вместе с видео.",
+          "recordAudioAndroid": true
+        }
+      ],
+      "expo-secure-store"
+    ],
+    "experiments": {
+      "typedRoutes": false
+    }
+  }
+}
